@@ -6,15 +6,17 @@ void configGPIO(void);
 int main(void)
 {
     configGPIO();
+    while(1){
+        activarLuzA();
+        delayMs(500);
+        apagarLuzA();
+        delayMs(500);
+        activarLuzB();
+        delayMs(500);
+        apagarLuzB();
+        delayMs(500);
+    }
     
-    activarLuzA();
-    delayMs(500);
-    apagarLuzA();
-    delayMs(500);
-    activarLuzB();
-    delayMs(500);
-    apagarLuzB();
-    delayMs(500);
 }
 
 void configGPIO(void)
