@@ -1,6 +1,6 @@
-# Resolución de Ejercicios Propuestos de Electrónica Digital con la Placa LPC1769
+# Resolución de Ejercicios Propuestos de Electrónica Digital 3 con la Placa LPC1769
 
-En este repositorio se presentarán las **resoluciones de ejercicios propuestos de la materia Electrónica Digital**, utilizando como plataforma de desarrollo la **placa LPC1769**.
+En este repositorio se presentarán las **resoluciones de ejercicios propuestos de la materia Electrónica Digital 3**, utilizando como plataforma de desarrollo la **placa LPC1769**.
 
 La estructura del repositorio será la siguiente:
 
