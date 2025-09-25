@@ -27,10 +27,26 @@ void configGPIO(void) {
     NVIC_EnableIRQ(EINT3_IRQn);//habilita la interrupcion por puerto
 }
 
-void configEINT1(void){
+void configEINT1(void){ LPC_GPIO->F
     LPC_SC->EXTMODE |= (0b1<<1);//configuro la interrupcion externa por flanco
     LPC_SC->EXTPOLAR |= (0b0<<1);//selecciono el flanco de bajada, aunque no es necesario porque
     //por defecto esta configurado asi
     LPC_SC->EXTINT |= (0b1<<1);//limpio la bandera de la EINT1
-    NVIC_SetPRiority
+    NVIC_SetPRiority(EINT1_IRQn, 2);//Le doy prioridad 2 a la interrupcion externa 1
+    NVIC_EnableIRQ(EINT1_IRQn);//habilito la interrupcion externa 1
+
+}
+
+void EINT1_IRQHandler(void){
+   IOSET |= (0b1<<0);//Pongo a 1 el pin P0.0
+    for(int i = 0; i < 1000000; i++);//retardo
+    LPC_GPIO->FIOCLR |= (0b1<<0);//Pongo a 0 el pin P0.0
+    LPC_SC->EXTINT |= (0b1<<1);//Limpio la bandera de la EINT1
+}
+
+void EINT3_IRQHandler(void){
+    LPC_GPIOINT->IO0IntClr |= (0b1<<0);//Limpio la bandera de interrupcion del pin P0.0
+    LPC_GPIO->FIOSET |= (0b1<<0);//Pongo a 1 el pin P0.0
+    for(int i = 0; i < 1000000; i++);//retardo
+    LPC_GPIO->FIOCLR |= (0b1<<0);//Pongo a 0 el pin P0.0
 }
