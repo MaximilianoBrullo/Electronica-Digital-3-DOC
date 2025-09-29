@@ -83,3 +83,4 @@ void TIMER_IRQHandler(void){//llamado a la interrupcion
 		}
 	}
 	TIM_ClearIntPending(LPC_TIM0, TIM_MR0_INT);
+}
