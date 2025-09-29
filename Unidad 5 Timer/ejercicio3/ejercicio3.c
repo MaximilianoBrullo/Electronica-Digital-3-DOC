@@ -5,6 +5,15 @@
  *      Author: maxib
  */
 
+
+/*
+ * Ejercicio 3: Interrupción por Timer
+Escribir un programa para que por cada presión de un pulsador, la
+frecuencia de parpadeo de un led disminuya a la mitad debido a la
+modificación del prescaler del Timer 2. El pulsador debe producir una
+interrupción por EINT1 con flanco descendente.
+*/
+
 /*Directivas de inclusion*/
 #include "LPC17xx.h"
 #include "LPC17xx_pinsel.h"
@@ -13,7 +22,7 @@
 /*Macros y definiciones*/
 
 /*Variables globales*/
-static uint8_t counter = 0;
+static uint8_t counter = 10;
 
 /*Definicion de funciones*/
 void cfgPinsel(void);
@@ -21,7 +30,7 @@ void cfgTimer());
 
 /*Funcion principal*/
 int main(void){
-	
+
 	cfgPinsel();
 	cfgTimer(1000);
 	while(1);
@@ -31,21 +40,21 @@ int main(void){
 void cfgTimer(int prescaler){
 	TIM_TIMERCFG_Type cfgTimer2
 	TIM_MATCHCFG_Type cfgMatch1
-	
+
 	cfgTimer2.PrescaleOptcion = TIM_PRESCALE_USVAL;
 	cfgTimer2.PrecaleValue = prescaler;//valor de tiempo en el que el preescaler desborda
-	
+
 	cfgMatch1.MatchChannel = 1;
 	cfgMarch1.MatchValue = 999;
 	cfgMatch1.IntOnMatch = ENABLE;
 	cfgMatch1.ResetOnMatch = ENABLE;
 	cfgMatch1.StopOnMatch =DISABLE;
 	cfgMatch1.ExtMatchOutputType = TIM_EXTMATCH_NOTHING;
-	
+
 	TIM_Init(LPC_TIM2, TIM_TIMER_MODE,&cfgTimer2);
 	TIM_ConfigMatch(LPC_TIM2, &cfgMatch1);
 	TIM_Cmd(LPC_TIM2,ENABLE);
-	
+
 	NVIC_EnableIRQ(TIMER2_IRQn);
 	return;
 }
@@ -53,25 +62,27 @@ void cfgTimer(int prescaler){
 void cfgPinsel(){
 	PINSEL_CFG_Type led;
 	PINSEL_CFG_Type pulsador;
-	
+
 	led.Portnum = PINSEL_PORT_0;
 	led.Pinnum = PINSEL_PIN_22;
 	led.Funcnum = PINSEL_PIN_0;
 	led.Pinmode = PINSEL_PINMODE_TRISTATE;
 	led.OpenDrain = PINSEL_PINMODE_NORMAL;
-	
+
 	GPIO_SetDir(PORT_0, PIN_22, OUTPUT);
-	
-	pulsador.Portnum = PINSEL_PORT_0;
-	pulsador.Pinnum = PINSEL_PIN_7;
-	pulsador.Funcnum = PINSEL_FUNC_3;
+
+	pulsador.Portnum = PINSEL_PORT_2;
+	pulsador.Pinnum = PINSEL_PIN_11;
+	pulsador.Funcnum = PINSEL_FUNC_1;
 	pulsador.PinMode = PINSEL_PINMODE_PULLDOWN;
 	pulsador.OpenDrain = PINSEL_PINMODE_NORMAL;
-	
+
 	GPIO_SetDir(PORT_0, PIN_7, INPUT);
-	
+
 	PINSEL_ConfigPin(led);
 	PINSEL_ConfigPin(pulsador);
+
+	NVIC_EnableIRQ(EXT_IRQ1);
 	return;
 }
 
@@ -83,10 +94,9 @@ void TIMER_IRQHandler(void){
 }
 
 void INT_IRQHandler(void){
-	if(counter <= 0){
-		cfgTimer(1000);
+	if(counter >= 9999){
+		cfgTimer(10);
 	}else{
-		cfgTimer(counter / 2);
+		cfgTimer(counter * 2);
 	}
-    return
 }
