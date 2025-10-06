@@ -1,85 +1,61 @@
-/*Directivad de inclusion*/
-#include "LPC17xx.h"
-#include "lpc17xx_timer.h"
 #include "lpc17xx_pinsel.h"
 #include "lpc17xx_gpio.h"
+#include "lpc17xx_timer.h"
 
-/*Definicion de constantes y macros*/
-#define OUTPUT (uint8_t) 1
-#define INPUT (uint8_t) 0
-#define PORT_0 (uint8_t) 0
-#define PIN_22 ((uint8_t) (1<<22))
+void cfgPin();
+void cfgTimer();
 
-
-/*Definicion de variables globales*/
-
-/*Definicion de funciones*/
-void configGPIO(void);
-void configTIMER0(void);
-
-/*Funcion principal*/
-int main(void)
+int main()
 {
-    configGPIO(); /*Configuracion del GPIO*/
-    configTimer(); /*Configuracion del TIMER0*/
-    while(1); /*Bucle infinito*/
-    return 0;
+	cfgPin();
+	cfgTimer();
+	while(1);
+	return 1;
 }
 
-void configGPIO(void)
+void cfgPin()
 {
-    PINSEL_CFG_Type cfgPinLED;//nombro a la estructura P0_22
-    PINSEL_CFG_Type cfgPinMAT0;//nombro a la estructura P1_28
-    
-    cfgPinLED.Portnum = PINSEL_PORT_0;//indicamos puerto
-    cfgPinLED.Pinnum = PINSEL_PIN_22;//indicamos pin
-    cfgPinLED.Funcnum = PINSEL_FUNC_0;//indicamos funcion
-    cfgPinLED.Pinmode = PINSEL_PINMODE_TRISTATE;//indicamos modo(si es entrada)
-    cfgPinLED.OpenDrain = PINSEL_PINMODE_NORMAL;//config para el open drain
-    
-    GPIO_SetDir(PORT_0 ,PIN_22, OUTPUT);//configura el pin como entrada o salida
-    
-    cfgPinMAT0.Portnum = PINSEL_PORT_1;//indicamos puerto
-    cfgPinMAT0.Pinnum = PINSEL_PIN_28;//indicamos pin
-    cfgPinMAT0.Funcnum = PINSEL_FUNC_3;//indicamos funcion
-    cfgPinMAT0.OpenDrain = PINSEL_PINMODEe_NORMAL;//activa o no el open drain.
-    
-    PINSEL_ConfigPin(&cfgPinLED);//se configuran los pines de acuerdo a los parametros
-    PINSEL_ConfigPin(&cfgPinMAT0);//idem anterior
-    return;
+	PINSEL_CFG_Type led = {0};
+	led.portNum = PINSEL_PORT_0;
+	led.pinNum = PINSEL_PIN_22;
+	led.funcNum = PINSEL_FUNC_0;
+	PINSEL_ConfigPin(&led);
+	GPIO_SetDir(GPIO_PORT_0, 0xFFFFFFFF, GPIO_OUTPUT);
 }
 
-void configTimer(void){
-	TIM_TIMERCFG_Type cfgTimerMode;
-	TIM_MATCHCFG_Type cfgTimerMatch;
-	
-	cfgTimerMode.PrescaleOption = TIM_PRESCALE_USVAL;//configuramos que el valor agregado es en microsegundos
-	cfgTimerMode.PrescaleValue = 1000;//valor maximo del prescaler
-	
-	cfgTimerMatch.MatchChannel = 0;
-	cfgTimerMatch.MatchValue = 999;
-	cfgTimerMatch.IntOnMatch = ENABLE;
-	cfgTimerMatch.ResetOnMatch = ENABLE;
-	cfgTimerMatch.StopOnMatch = DISABLE;
-	cfgTimerMatch.ExtMatchOutputType = TIM_EXTMATCH_NOTHING;
-	
-	TIM_Init(LPC_TIM0, TIM_TIMER_MODE, &cfgTimerMode);
-	TIM_ConfigMatch(LPC_TIM0, &cfgTimerMatch);
+void cfgTimer()
+{
+	TIM_TIMERCFG_Type timer = {TIM_USVAL, 1000};
+	TIM_Init(LPC_TIM0, TIM_TIMER_MODE, &timer);
+
+	TIM_MATCHCFG_Type match;
+	match.matchChannel = TIM_MATCH_CHANNEL_0;
+	match.intOnMatch = ENABLE;
+	match.stopOnMatch = DISABLE;
+	match.resetOnMatch = ENABLE;
+	match.extMatchOutputType = TIM_NOTHING;
+	match.matchValue = 1000;
+	TIM_ConfigMatch(LPC_TIM0, &match);
+
 	TIM_Cmd(LPC_TIM0, ENABLE);
-	
+
 	NVIC_EnableIRQ(TIMER0_IRQn);
 	return;
 }
 
-void TIMER_IRQHandler(void){//llamado a la interrupcion
-	if(TIM_GetIntStatus(LPC_TIM0, TIM_MRO_INT)){
-		static uint8_t i = 0;
-		if(i == 0){
-			GPIO_SetValue(PORT_0, PIN_22);//pone en 1 el pin del puerto indicado
-			i = 1;
-		}else if(i == 1){
-			GPIO_ClearValue(PORT_0,PIN_22);//pone en 0 el pin del puerto indicado
-			i == 0;
+void TIMER0_IRQHandler(void)
+{
+	static uint8_t i = 0;
+	if(TIM_GetIntStatus(LPC_TIM0, TIM_MR0_INT))
+	{
+		if(i == 0)
+		{
+			GPIO_SetPins(GPIO_PORT_0, 0xFFFFFFFF);
+			i=1;
+		}else if(i == 1)
+		{
+			GPIO_ClearPins(GPIO_PORT_0, 0xFFFFFFFF);
+			i=0;
 		}
 	}
 	TIM_ClearIntPending(LPC_TIM0, TIM_MR0_INT);

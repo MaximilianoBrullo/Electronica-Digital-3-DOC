@@ -93,7 +93,7 @@ void TIMER_IRQHandler(void){
 	return;
 }
 
-void INT_IRQHandler(void){
+void EINT1_IRQHandler(void){
 	if(counter >= 9999){
 		cfgTimer(10);
 	}else{

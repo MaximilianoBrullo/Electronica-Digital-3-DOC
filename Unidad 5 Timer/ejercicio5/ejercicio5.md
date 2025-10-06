@@ -1,0 +1,3 @@
+## Ejercicio 5
+Utilizando los 4 match del Timer0 y las salidas P0.0 a P0.3, realizar un programa en C que permita obtener los formas de onda que son muy utilies para controlar un motor paso a paso.
+Un pulsador conectado en la entrada EINT3, mediante una rutina de servicio a la interrupcion, permitira elejir entre las dos secuencias, una secuencia que tenga menor consumo pero que el motor genera menor par y otra en la que el motor tenga mayor velocidad y mayor par a costa de un mayor consumo. La prioridad de la interrupcion del Timer tiene que ser mayor que la prioridas del pulsador.
